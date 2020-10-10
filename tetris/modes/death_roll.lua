@@ -5,17 +5,20 @@ local Piece = require 'tetris.components.piece'
 
 local History6RollsRandomizer = require 'tetris.randomizers.history_6rolls_35bag'
 
-local SurvivalA3Game = GameMode:extend()
+local DeathRoll = GameMode:extend()
 
-SurvivalA3Game.name = "Survival A3"
-SurvivalA3Game.hash = "SurvivalA3"
-SurvivalA3Game.tagline = "The blocks turn black and white! Can you make it to level 1300?"
-
-
+DeathRoll.name = "Death Roll"
+DeathRoll.hash = "DeathRoll"
+DeathRoll.tagline = "Don't even bother."
 
 
-function SurvivalA3Game:new()
-	SurvivalA3Game.super:new()
+
+
+function DeathRoll:new()
+	DeathRoll.super:new()
+
+	switchBGM("death_roll")
+
 	self.level = 0
 	self.grade = 0
 	self.garbage = 0
@@ -39,62 +42,50 @@ function SurvivalA3Game:new()
 	self.coolregret_timer = 0
 end
 
-function SurvivalA3Game:getARE()
-	    if self.level < 300 then return 12
-	else return 6 end
+
+function DeathRoll:getARE()
+	if self.frames < 2399 then return 10 end
+	if self.frames < 5339 then return 8 end
+	if self.frames >= 5340 then return 6 end
 end
 
-function SurvivalA3Game:getLineARE()
-	    if self.level < 100 then return 8
-	elseif self.level < 200 then return 7
-	elseif self.level < 500 then return 6
-	elseif self.level < 1300 then return 5
-	else return 6 end
+function DeathRoll:getLineARE()
+	if self.frames < 2399 then return 10 end
+	if self.frames < 5339 then return 8 end
+	if self.frames >= 5340 then return 6 end
 end
 
-function SurvivalA3Game:getDasLimit()
-	    if self.level < 100 then return 9
-	elseif self.level < 500 then return 7
-	else return 5 end
+function DeathRoll:getDasLimit()
+	return 5
 end
 
-function SurvivalA3Game:getLineClearDelay()
-	if self.level < 1300 then return self:getLineARE() - 2
-	else return 6 end
+function DeathRoll:getLineClearDelay()
+	return 6
 end
 
-function SurvivalA3Game:getLockDelay()
-	    if self.level < 200 then return 18
-	elseif self.level < 300 then return 17
-	elseif self.level < 500 then return 15
-	elseif self.level < 600 then return 13
-	elseif self.level < 1100 then return 12
-	elseif self.level < 1200 then return 10
-	elseif self.level < 1300 then return 8
-	else return 15 end
+function DeathRoll:getLockDelay()
+	if self.frames < 2399 then return 20 end
+	if self.frames < 5339 then return 15 end
+	if self.frames >= 5340 then return 10 end
 end
 
-function SurvivalA3Game:getGravity()
+function DeathRoll:getGravity()
 	return 20
 end
 
-function SurvivalA3Game:getGarbageLimit()
-	if self.level < 600 then return 20
-	elseif self.level < 700 then return 18
-	elseif self.level < 800 then return 10
-	elseif self.level < 900 then return 9
-	else return 8 end
+function DeathRoll:getGarbageLimit()
+	return 8
 end
 
-function SurvivalA3Game:getNextPiece(ruleset)
+function DeathRoll:getNextPiece(ruleset)
 	return {
-		skin = self.level >= 1000 and "bone" or "2tie",
+		skin = self.frames >= 2250 and "bone" or "2tie",
 		shape = self.randomizer:nextPiece(),
 		orientation = ruleset:getDefaultOrientation(),
 	}
 end
 
-function SurvivalA3Game:hitTorikan(old_level, new_level)
+function DeathRoll:hitTorikan(old_level, new_level)
 	if old_level < 500 and new_level >= 500 and self.frames > frameTime(2,28) then
 		self.level = 500
 		return true
@@ -106,12 +97,7 @@ function SurvivalA3Game:hitTorikan(old_level, new_level)
 	return false
 end
 
-function SurvivalA3Game:advanceOneFrame()
-
-	if self.frames == 7200 then
-		self.clear = true
-	end
-
+function DeathRoll:advanceOneFrame()
 	if self.clear then
 		self.roll_frames = self.roll_frames + 1
 		if self.roll_frames < 0 then
@@ -128,11 +114,9 @@ function SurvivalA3Game:advanceOneFrame()
 		self.frames = self.frames + 1
 	end
 	return true
-
-
 end
 
-function SurvivalA3Game:onPieceEnter()
+function DeathRoll:onPieceEnter()
 	if (self.level % 100 ~= 99) and not self.clear and self.frames ~= 0 then
 		self.level = self.level + 1
 	end
@@ -141,7 +125,7 @@ end
 local cleared_row_levels = {1, 2, 4, 6}
 local cleared_row_points = {0.02, 0.05, 0.15, 0.6}
 
-function SurvivalA3Game:onLineClear(cleared_row_count)
+function DeathRoll:onLineClear(cleared_row_count)
 	if not self.clear then
 		local new_level = self.level + cleared_row_levels[cleared_row_count]
 		self:updateSectionTimes(self.level, new_level)
@@ -160,11 +144,11 @@ function SurvivalA3Game:onLineClear(cleared_row_count)
 	end
 end
 
-function SurvivalA3Game:onPieceLock(piece, cleared_row_count)
+function DeathRoll:onPieceLock(piece, cleared_row_count)
 	if cleared_row_count == 0 then self:advanceBottomRow(1) end
 end
 
-function SurvivalA3Game:updateScore(level, drop_bonus, cleared_lines)
+function DeathRoll:updateScore(level, drop_bonus, cleared_lines)
 	if cleared_lines > 0 then
 		self.score = self.score + (
 			(math.ceil((level + cleared_lines) / 4) + drop_bonus) *
@@ -178,7 +162,7 @@ function SurvivalA3Game:updateScore(level, drop_bonus, cleared_lines)
 	end
 end
 
-function SurvivalA3Game:updateSectionTimes(old_level, new_level)
+function DeathRoll:updateSectionTimes(old_level, new_level)
 	if math.floor(old_level / 100) < math.floor(new_level / 100) then
 		local section = math.floor(old_level / 100) + 1
 		section_time = self.frames - self.section_start_time
@@ -193,7 +177,7 @@ function SurvivalA3Game:updateSectionTimes(old_level, new_level)
 	end
 end
 
-function SurvivalA3Game:advanceBottomRow(dx)
+function DeathRoll:advanceBottomRow(dx)
 	if self.level >= 500 and self.level < 1000 then
 		self.garbage = math.max(self.garbage + dx, 0)
 		if self.garbage >= self:getGarbageLimit() then
@@ -203,7 +187,7 @@ function SurvivalA3Game:advanceBottomRow(dx)
 	end
 end
 
-function SurvivalA3Game:drawGrid()
+function DeathRoll:drawGrid()
 	self.grid:draw()
 end
 
@@ -215,8 +199,8 @@ local function getLetterGrade(grade)
 	end
 end
 
-function SurvivalA3Game:drawScoringInfo()
-	SurvivalA3Game.super.drawScoringInfo(self)
+function DeathRoll:drawScoringInfo()
+	DeathRoll.super.drawScoringInfo(self)
 
 	love.graphics.setColor(1, 1, 1, 1)
 
@@ -237,7 +221,7 @@ function SurvivalA3Game:drawScoringInfo()
 	end
 
 	local current_section = math.floor(self.level / 100) + 1
-	self:drawSectionTimesWithSplits(current_section)
+	-- self:drawSectionTimesWithSplits(current_section)
 
 	love.graphics.setFont(font_3x5_3)
 	love.graphics.printf(getLetterGrade(math.floor(self.grade)), text_x, 140, 90, "left")
@@ -253,11 +237,11 @@ function SurvivalA3Game:drawScoringInfo()
     end
 end
 
-function SurvivalA3Game:getBackground()
+function DeathRoll:getBackground()
 	return math.floor(self.level / 100)
 end
 
-function SurvivalA3Game:getHighscoreData()
+function DeathRoll:getHighscoreData()
 	return {
 		level = self.level,
 		frames = self.frames,
@@ -265,4 +249,4 @@ function SurvivalA3Game:getHighscoreData()
 	}
 end
 
-return SurvivalA3Game
+return DeathRoll

@@ -26,6 +26,7 @@ game_modes = {
 	require 'tetris.modes.survival_a3',
 	require 'tetris.modes.big_a2',
 	require 'tetris.modes.konoha',
+	require 'tetris.modes.death_roll',
 }
 
 rulesets = {

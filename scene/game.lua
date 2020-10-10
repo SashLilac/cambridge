@@ -7,10 +7,14 @@ function GameScene:new(game_mode, ruleset)
 	self.game:initialize(self.ruleset)
 	if game_mode.name == "Demon Mode" and math.random(1, 7) == 7 then
 		presence.details = "Suffering"
+		presence.state = game_mode.name
+	elseif game_mode.name == "Race 40" then
+		presence.details = "Sprinting (Race 40)"
 	else
 		presence.details = "In game"
+		presence.state = game_mode.name
 	end
-	presence.state = game_mode.name
+
 	discordRPC.updatePresence(presence)
 end
 
@@ -53,9 +57,12 @@ function GameScene:render()
 
 	-- ready/go graphics
 	if self.game.ready_frames <= 100 and self.game.ready_frames > 52 then
+		playSEOnce("ready")
 		love.graphics.draw(misc_graphics["ready"], 144 - 50, 240 - 14)
 	elseif self.game.ready_frames <= 50 and self.game.ready_frames > 2 then
+		playSEOnce("go")
 		love.graphics.draw(misc_graphics["go"], 144 - 27, 240 - 14)
+
 	end
 
 	self.game:drawCustom()

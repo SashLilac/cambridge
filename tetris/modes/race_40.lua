@@ -15,13 +15,16 @@ Race40Game.tagline = "How fast can you clear 40 lines?"
 function Race40Game:new()
 	Race40Game.super:new()
 
+	presence.state = "0/40"
+	discordRPC.updatePresence(presence)
+
 	self.lines = 0
 	self.line_goal = 40
 	self.pieces = 0
 	self.randomizer = History6RollsRandomizer()
 
 	self.roll_frames = 0
-	
+
 	self.lock_drop = true
 	self.lock_hard_drop = true
 	self.instant_hard_drop = true
@@ -86,6 +89,8 @@ function Race40Game:onLineClear(cleared_row_count)
 			self.clear = true
 		end
 	end
+	presence.state = self.lines .. "/40"
+	discordRPC.updatePresence(presence)
 end
 
 function Race40Game:drawGrid(ruleset)
@@ -107,7 +112,7 @@ function Race40Game:drawScoringInfo()
 	love.graphics.setColor(1, 1, 1, 1)
 
 	local text_x = config["side_next"] and 320 or 240
-	
+
 	love.graphics.setFont(font_3x5_2)
 	love.graphics.printf("NEXT", 64, 40, 40, "left")
 	love.graphics.printf("LINES", text_x, 320, 40, "left")

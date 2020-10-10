@@ -16,7 +16,13 @@ MarathonA3Game.tagline = "The game gets faster way more quickly! Can you get all
 
 function MarathonA3Game:new()
     MarathonA3Game.super:new()
+
+    presence.details = "Playing Marathon A3"
     
+  	discordRPC.updatePresence(presence)
+
+    self.ready_frames = 120
+
     self.speed_level = 0
 	self.roll_frames = 0
     self.combo = 1
@@ -29,14 +35,14 @@ function MarathonA3Game:new()
 	self.section_start_time = 0
 	self.section_70_times = { [0] = 0 }
 	self.section_times = { [0] = 0 }
-    
+
 	self.randomizer = History6RollsRandomizer()
 
     self.lock_drop = true
     self.lock_hard_drop = true
 	self.enable_hold = true
 	self.next_queue_length = 3
-	
+
 	self.coolregret_message = "COOL!!"
 	self.coolregret_timer = 0
 end
@@ -164,7 +170,7 @@ end
 
 local cool_cutoffs = {
 	frameTime(0,52), frameTime(0,52), frameTime(0,49), frameTime(0,45), frameTime(0,45),
-	frameTime(0,42), frameTime(0,42), frameTime(0,38), frameTime(0,38), 
+	frameTime(0,42), frameTime(0,42), frameTime(0,38), frameTime(0,38),
 }
 
 local regret_cutoffs = {
@@ -409,7 +415,7 @@ function MarathonA3Game:drawScoringInfo()
 			love.graphics.printf(formatTime(time), section_70_x, 40 + 20 * section, 90, "left")
 		end
 	end
-	
+
 	local current_x
 	if table.getn(self.section_times) < table.getn(self.section_70_times) then
 		current_x = section_x
@@ -418,7 +424,7 @@ function MarathonA3Game:drawScoringInfo()
 	end
 
 	love.graphics.printf(formatTime(self.frames - self.section_start_time), current_x, 40 + 20 * current_section, 90, "left")
-	
+
 	if(self.coolregret_timer > 0) then
                 love.graphics.printf(self.coolregret_message, 64, 400, 160, "center")
                 self.coolregret_timer = self.coolregret_timer - 1
